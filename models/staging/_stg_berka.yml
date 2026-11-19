@@ -1,0 +1,158 @@
+version: 2
+
+models:
+  - name: stg_berka__accounts
+    description: One row per bank account. Cleaned from raw.account.
+    columns:
+      - name: account_id
+        description: Account identifier.
+      - name: district_id
+        description: District of the branch that opened the account.
+      - name: frequency
+        description: Statement frequency (monthly, weekly, after_transaction).
+      - name: created_date
+        description: Date the account was opened.
+      - name: _loaded_at
+        description: Timestamp when the raw row was loaded.
+
+  - name: stg_berka__clients
+    description: One row per client. Cleaned from raw.client.
+    columns:
+      - name: client_id
+        description: Client identifier.
+      - name: birth_number
+        description: Encoded birth date and gender (YYMMDD, month + 50 for women). Decoded in intermediate.
+      - name: district_id
+        description: District where the client lives.
+      - name: _loaded_at
+        description: Timestamp when the raw row was loaded.
+
+  - name: stg_berka__dispositions
+    description: Link between clients and accounts. Cleaned from raw.disp.
+    columns:
+      - name: disposition_id
+        description: Disposition identifier.
+      - name: client_id
+        description: Client identifier.
+      - name: account_id
+        description: Account identifier.
+      - name: disposition_type
+        description: Client role on the account (owner, disponent).
+      - name: _loaded_at
+        description: Timestamp when the raw row was loaded.
+
+  - name: stg_berka__cards
+    description: One row per credit card. Cleaned from raw.card.
+    columns:
+      - name: card_id
+        description: Card identifier.
+      - name: disposition_id
+        description: Disposition the card belongs to.
+      - name: card_type
+        description: Card type (junior, classic, gold).
+      - name: issued_date
+        description: Date the card was issued.
+      - name: _loaded_at
+        description: Timestamp when the raw row was loaded.
+
+  - name: stg_berka__districts
+    description: One row per district with demographic data. Cleaned from raw.district (A1-A16).
+    columns:
+      - name: district_id
+        description: District identifier (A1).
+      - name: district_name
+        description: District name (A2).
+      - name: region
+        description: Region name (A3).
+      - name: inhabitants
+        description: Number of inhabitants (A4).
+      - name: municipalities_lt_500
+        description: Municipalities with fewer than 500 inhabitants (A5).
+      - name: municipalities_500_1999
+        description: Municipalities with 500-1999 inhabitants (A6).
+      - name: municipalities_2000_9999
+        description: Municipalities with 2000-9999 inhabitants (A7).
+      - name: municipalities_gt_10000
+        description: Municipalities with more than 10000 inhabitants (A8).
+      - name: cities
+        description: Number of cities (A9).
+      - name: urban_ratio
+        description: Ratio of urban inhabitants, percent (A10).
+      - name: average_salary
+        description: Average salary (A11).
+      - name: unemployment_rate_95
+        description: Unemployment rate in 1995, percent (A12). NULL if unknown.
+      - name: unemployment_rate_96
+        description: Unemployment rate in 1996, percent (A13).
+      - name: entrepreneurs_per_1000
+        description: Entrepreneurs per 1000 inhabitants (A14).
+      - name: crimes_95
+        description: Number of crimes in 1995 (A15). NULL if unknown.
+      - name: crimes_96
+        description: Number of crimes in 1996 (A16).
+      - name: _loaded_at
+        description: Timestamp when the raw row was loaded.
+
+  - name: stg_berka__loans
+    description: One row per loan. Cleaned from raw.loan.
+    columns:
+      - name: loan_id
+        description: Loan identifier.
+      - name: account_id
+        description: Account that received the loan.
+      - name: granted_date
+        description: Date the loan was granted.
+      - name: amount
+        description: Loan amount.
+      - name: duration
+        description: Loan duration in months.
+      - name: payments
+        description: Monthly payment amount.
+      - name: loan_status
+        description: Loan status (finished_ok, finished_unpaid, running_ok, running_in_debt).
+      - name: _loaded_at
+        description: Timestamp when the raw row was loaded.
+
+  - name: stg_berka__orders
+    description: One row per standing payment order. Cleaned from raw.orders.
+    columns:
+      - name: order_id
+        description: Order identifier.
+      - name: account_id
+        description: Account that pays the order.
+      - name: bank_to
+        description: Bank of the recipient.
+      - name: account_to
+        description: Account of the recipient.
+      - name: amount
+        description: Order amount.
+      - name: purpose
+        description: Payment purpose (insurance, household, leasing, loan_payment). NULL if empty.
+      - name: _loaded_at
+        description: Timestamp when the raw row was loaded.
+
+  - name: stg_berka__transactions
+    description: One row per account transaction. Cleaned from raw.trans.
+    columns:
+      - name: transaction_id
+        description: Transaction identifier.
+      - name: account_id
+        description: Account of the transaction.
+      - name: transaction_date
+        description: Date of the transaction.
+      - name: transaction_type
+        description: Transaction type (credit, debit, withdrawal).
+      - name: operation
+        description: Operation mode (card_withdrawal, cash_deposit, collection_from_bank, cash_withdrawal, remittance_to_bank). NULL if empty.
+      - name: amount
+        description: Transaction amount.
+      - name: balance
+        description: Account balance after the transaction.
+      - name: purpose
+        description: Transaction purpose (insurance, statement_fee, interest, penalty_interest, household, pension, loan_payment). NULL if empty.
+      - name: partner_bank
+        description: Bank of the partner. NULL if empty.
+      - name: partner_account
+        description: Account of the partner. NULL if empty.
+      - name: _loaded_at
+        description: Timestamp when the raw row was loaded.
