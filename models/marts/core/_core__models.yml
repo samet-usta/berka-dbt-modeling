@@ -1,0 +1,140 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: "Date dimension. One row per day from dim_date_start to dim_date_end."
+    columns:
+      - name: date_key
+        description: "Smart key in YYYYMMDD format (integer)."
+      - name: date_day
+        description: "Calendar date."
+      - name: year
+        description: "Calendar year."
+      - name: quarter
+        description: "Quarter of the year (1-4)."
+      - name: month
+        description: "Month number (1-12)."
+      - name: month_name
+        description: "Month name in English."
+      - name: year_month
+        description: "Year and month in YYYY-MM format."
+      - name: day_of_month
+        description: "Day of the month (1-31)."
+      - name: day_of_week
+        description: "ISO day of week (1 = Monday, 7 = Sunday)."
+      - name: day_name
+        description: "Day name in English."
+      - name: is_weekend
+        description: "True if the day is Saturday or Sunday."
+
+  - name: dim_customer
+    description: "Customer dimension. One row per client."
+    columns:
+      - name: customer_key
+        description: "Surrogate key. Hash of client_id."
+      - name: client_id
+        description: "Natural key from the source."
+      - name: gender
+        description: "Client gender (male, female). Derived from birth_number."
+      - name: birth_date
+        description: "Client birth date. Derived from birth_number."
+      - name: age
+        description: "Client age at the reference_date var."
+      - name: district_name
+        description: "Name of the client district."
+      - name: region
+        description: "Region of the client district."
+      - name: district_average_salary
+        description: "Average salary in the client district."
+      - name: has_card
+        description: "True if the client has a card."
+      - name: card_type
+        description: "Card type (classic, junior, gold). Null if no card."
+      - name: card_issued_date
+        description: "Card issue date. Null if no card."
+
+  - name: dim_account
+    description: "Account dimension. One row per account."
+    columns:
+      - name: account_key
+        description: "Surrogate key. Hash of account_id."
+      - name: account_id
+        description: "Natural key from the source."
+      - name: frequency
+        description: "Statement frequency (monthly, weekly, after_transaction)."
+      - name: created_date
+        description: "Account creation date."
+      - name: district_name
+        description: "Name of the account branch district."
+      - name: region
+        description: "Region of the account branch district."
+      - name: owner_client_id
+        description: "client_id of the account owner. Shortcut for simple queries."
+      - name: disponent_count
+        description: "Number of disponents (users who are not the owner)."
+      - name: has_loan
+        description: "True if the account has a loan."
+
+  - name: bridge_account_client
+    description: "Bridge for the many-to-many relation between accounts and clients. One row per disposition."
+    columns:
+      - name: disposition_id
+        description: "Natural key of the disposition. Grain of the table."
+      - name: account_key
+        description: "Foreign key to dim_account."
+      - name: customer_key
+        description: "Foreign key to dim_customer."
+      - name: account_id
+        description: "Natural key of the account."
+      - name: client_id
+        description: "Natural key of the client."
+      - name: disposition_type
+        description: "Role of the client on the account (owner, disponent)."
+
+  - name: fct_transactions
+    description: "Transaction fact. One row per transaction. Incremental model."
+    columns:
+      - name: transaction_id
+        description: "Natural key of the transaction. unique_key of the incremental model."
+      - name: account_key
+        description: "Foreign key to dim_account."
+      - name: date_key
+        description: "Foreign key to dim_date."
+      - name: transaction_date
+        description: "Transaction date. Used by the incremental filter."
+      - name: transaction_type
+        description: "Transaction type (credit, debit, withdrawal)."
+      - name: operation
+        description: "Operation type. Null if unknown."
+      - name: purpose
+        description: "Purpose of the transaction. Null if unknown."
+      - name: amount
+        description: "Transaction amount. Always positive."
+      - name: signed_amount
+        description: "Amount with sign. Credit is positive, other types are negative."
+      - name: balance
+        description: "Account balance after the transaction. Semi-additive: do not sum over time."
+      - name: partner_bank
+        description: "Bank of the partner account. External value."
+      - name: partner_account
+        description: "Partner account number. External value."
+
+  - name: fct_loans
+    description: "Loan fact. One row per loan. Incremental model."
+    columns:
+      - name: loan_id
+        description: "Natural key of the loan. unique_key of the incremental model."
+      - name: account_key
+        description: "Foreign key to dim_account."
+      - name: date_key
+        description: "Foreign key to dim_date. Based on granted_date."
+      - name: granted_date
+        description: "Loan grant date. Used by the incremental filter."
+      - name: amount
+        description: "Loan amount."
+      - name: duration
+        description: "Loan duration in months."
+      - name: payments
+        description: "Monthly payment amount."
+      - name: loan_status
+        description: "Loan status (finished_ok, finished_unpaid, running_ok, running_in_debt)."
