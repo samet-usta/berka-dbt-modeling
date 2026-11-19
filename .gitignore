@@ -11,3 +11,5 @@ logs/
 # Python
 __pycache__/
 .venv/
+.user.yml
+.user.yml

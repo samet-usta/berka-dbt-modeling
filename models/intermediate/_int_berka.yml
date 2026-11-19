@@ -1,0 +1,75 @@
+version: 2
+
+models:
+  - name: int_clients_enriched
+    description: >
+      One row per client. Client data enriched with gender, birth date and age
+      (decoded from birth_number), district attributes, disposition and card info.
+      Source for dim_customer.
+    columns:
+      - name: client_id
+        description: Primary key. One row per client.
+      - name: birth_number
+        description: Original Berka birth number (YYMMDD, month + 50 for women).
+      - name: gender
+        description: "Decoded from birth_number: female if month > 50, else male."
+      - name: birth_date
+        description: Birth date decoded from birth_number.
+      - name: age
+        description: Age in full years at var('reference_date') (1998-12-31).
+      - name: district_id
+        description: Client's home district.
+      - name: district_name
+        description: District name.
+      - name: region
+        description: Region of the district.
+      - name: district_average_salary
+        description: Average salary in the client's district.
+      - name: disposition_id
+        description: The client's disposition (one per client).
+      - name: account_id
+        description: Account linked to the client's disposition.
+      - name: disposition_type
+        description: Client role on the account (owner or disponent).
+      - name: has_card
+        description: True if the client's disposition has a card.
+      - name: card_type
+        description: Card type (classic, junior, gold). Null if no card.
+      - name: card_issued_date
+        description: Card issue date. Null if no card.
+
+  - name: int_accounts_enriched
+    description: >
+      One row per account. Account data enriched with district attributes,
+      owner client, disponent count and loan info. Source for dim_account.
+    columns:
+      - name: account_id
+        description: Primary key. One row per account.
+      - name: frequency
+        description: Statement frequency (monthly, weekly, after_transaction).
+      - name: created_date
+        description: Account creation date.
+      - name: district_id
+        description: District of the bank branch.
+      - name: district_name
+        description: District name.
+      - name: region
+        description: Region of the district.
+      - name: owner_client_id
+        description: Client with disposition_type = owner. Each account has exactly one.
+      - name: disponent_count
+        description: Number of disponent clients on the account. 0 if none.
+      - name: has_loan
+        description: True if the account has a loan.
+      - name: loan_id
+        description: Loan id. Null if no loan.
+      - name: loan_granted_date
+        description: Loan grant date. Null if no loan.
+      - name: loan_amount
+        description: Loan amount. Null if no loan.
+      - name: loan_duration
+        description: Loan duration in months. Null if no loan.
+      - name: loan_payments
+        description: Monthly loan payment. Null if no loan.
+      - name: loan_status
+        description: Loan status (finished_ok, finished_unpaid, running_ok, running_in_debt).
