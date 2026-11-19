@@ -9,6 +9,9 @@ models:
     columns:
       - name: client_id
         description: Primary key. One row per client.
+        data_tests:
+          - unique
+          - not_null
       - name: birth_number
         description: Original Berka birth number (YYMMDD, month + 50 for women).
       - name: gender
@@ -45,6 +48,9 @@ models:
     columns:
       - name: account_id
         description: Primary key. One row per account.
+        data_tests:
+          - unique
+          - not_null
       - name: frequency
         description: Statement frequency (monthly, weekly, after_transaction).
       - name: created_date
@@ -73,3 +79,26 @@ models:
         description: Monthly loan payment. Null if no loan.
       - name: loan_status
         description: Loan status (finished_ok, finished_unpaid, running_ok, running_in_debt).
+
+unit_tests:
+  - name: test_int_clients_enriched_decodes_birth_number
+    description: "Decodes gender, birth_date and exact age from birth_number. Women have month + 50."
+    model: int_clients_enriched
+    overrides:
+      vars:
+        reference_date: '1998-06-15'
+    given:
+      - input: ref('stg_berka__clients')
+        rows:
+          - {client_id: 1, birth_number: 451212}
+          - {client_id: 2, birth_number: 655101}
+      - input: ref('stg_berka__districts')
+        rows: []
+      - input: ref('stg_berka__dispositions')
+        rows: []
+      - input: ref('stg_berka__cards')
+        rows: []
+    expect:
+      rows:
+        - {client_id: 1, gender: male, birth_date: '1945-12-12', age: 52}
+        - {client_id: 2, gender: female, birth_date: '1965-01-01', age: 33}

@@ -19,6 +19,10 @@ models:
     marts:
       +materialized: table
 
+data_tests:
+  berka:
+    +store_failures: true
+
 vars:
   reference_date: '1998-12-31'
   dim_date_start: '1993-01-01'

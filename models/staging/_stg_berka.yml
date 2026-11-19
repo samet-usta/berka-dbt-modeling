@@ -6,10 +6,19 @@ models:
     columns:
       - name: account_id
         description: Account identifier.
+        data_tests:
+          - unique
+          - not_null
       - name: district_id
         description: District of the branch that opened the account.
       - name: frequency
         description: Statement frequency (monthly, weekly, after_transaction).
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['monthly', 'weekly', 'after_transaction']
+              config:
+                severity: warn
       - name: created_date
         description: Date the account was opened.
       - name: _loaded_at
@@ -20,6 +29,9 @@ models:
     columns:
       - name: client_id
         description: Client identifier.
+        data_tests:
+          - unique
+          - not_null
       - name: birth_number
         description: Encoded birth date and gender (YYMMDD, month + 50 for women). Decoded in intermediate.
       - name: district_id
@@ -32,12 +44,21 @@ models:
     columns:
       - name: disposition_id
         description: Disposition identifier.
+        data_tests:
+          - unique
+          - not_null
       - name: client_id
         description: Client identifier.
       - name: account_id
         description: Account identifier.
       - name: disposition_type
         description: Client role on the account (owner, disponent).
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['owner', 'disponent']
+              config:
+                severity: warn
       - name: _loaded_at
         description: Timestamp when the raw row was loaded.
 
@@ -46,10 +67,19 @@ models:
     columns:
       - name: card_id
         description: Card identifier.
+        data_tests:
+          - unique
+          - not_null
       - name: disposition_id
         description: Disposition the card belongs to.
       - name: card_type
         description: Card type (junior, classic, gold).
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['junior', 'classic', 'gold']
+              config:
+                severity: warn
       - name: issued_date
         description: Date the card was issued.
       - name: _loaded_at
@@ -60,6 +90,9 @@ models:
     columns:
       - name: district_id
         description: District identifier (A1).
+        data_tests:
+          - unique
+          - not_null
       - name: district_name
         description: District name (A2).
       - name: region
@@ -98,6 +131,9 @@ models:
     columns:
       - name: loan_id
         description: Loan identifier.
+        data_tests:
+          - unique
+          - not_null
       - name: account_id
         description: Account that received the loan.
       - name: granted_date
@@ -110,6 +146,12 @@ models:
         description: Monthly payment amount.
       - name: loan_status
         description: Loan status (finished_ok, finished_unpaid, running_ok, running_in_debt).
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['finished_ok', 'finished_unpaid', 'running_ok', 'running_in_debt']
+              config:
+                severity: warn
       - name: _loaded_at
         description: Timestamp when the raw row was loaded.
 
@@ -118,6 +160,9 @@ models:
     columns:
       - name: order_id
         description: Order identifier.
+        data_tests:
+          - unique
+          - not_null
       - name: account_id
         description: Account that pays the order.
       - name: bank_to
@@ -128,6 +173,12 @@ models:
         description: Order amount.
       - name: purpose
         description: Payment purpose (insurance, household, leasing, loan_payment). NULL if empty.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['insurance', 'household', 'leasing', 'loan_payment']
+              config:
+                severity: warn
       - name: _loaded_at
         description: Timestamp when the raw row was loaded.
 
@@ -136,20 +187,41 @@ models:
     columns:
       - name: transaction_id
         description: Transaction identifier.
+        data_tests:
+          - unique
+          - not_null
       - name: account_id
         description: Account of the transaction.
       - name: transaction_date
         description: Date of the transaction.
       - name: transaction_type
         description: Transaction type (credit, debit, withdrawal).
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['credit', 'debit', 'withdrawal']
+              config:
+                severity: warn
       - name: operation
         description: Operation mode (card_withdrawal, cash_deposit, collection_from_bank, cash_withdrawal, remittance_to_bank). NULL if empty.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['card_withdrawal', 'cash_deposit', 'collection_from_bank', 'cash_withdrawal', 'remittance_to_bank']
+              config:
+                severity: warn
       - name: amount
         description: Transaction amount.
       - name: balance
         description: Account balance after the transaction.
       - name: purpose
         description: Transaction purpose (insurance, statement_fee, interest, penalty_interest, household, pension, loan_payment). NULL if empty.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['insurance', 'statement_fee', 'interest', 'penalty_interest', 'household', 'pension', 'loan_payment']
+              config:
+                severity: warn
       - name: partner_bank
         description: Bank of the partner. NULL if empty.
       - name: partner_account

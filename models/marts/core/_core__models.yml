@@ -6,6 +6,9 @@ models:
     columns:
       - name: date_key
         description: "Smart key in YYYYMMDD format (integer)."
+        data_tests:
+          - unique
+          - not_null
       - name: date_day
         description: "Calendar date."
       - name: year
@@ -32,14 +35,27 @@ models:
     columns:
       - name: customer_key
         description: "Surrogate key. Hash of client_id."
+        data_tests:
+          - unique
+          - not_null
       - name: client_id
         description: "Natural key from the source."
+        data_tests:
+          - unique
+          - not_null
       - name: gender
         description: "Client gender (male, female). Derived from birth_number."
       - name: birth_date
         description: "Client birth date. Derived from birth_number."
       - name: age
         description: "Client age at the reference_date var."
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 120
+              config:
+                severity: warn
       - name: district_name
         description: "Name of the client district."
       - name: region
@@ -58,8 +74,14 @@ models:
     columns:
       - name: account_key
         description: "Surrogate key. Hash of account_id."
+        data_tests:
+          - unique
+          - not_null
       - name: account_id
         description: "Natural key from the source."
+        data_tests:
+          - unique
+          - not_null
       - name: frequency
         description: "Statement frequency (monthly, weekly, after_transaction)."
       - name: created_date
@@ -77,13 +99,34 @@ models:
 
   - name: bridge_account_client
     description: "Bridge for the many-to-many relation between accounts and clients. One row per disposition."
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - account_id
+              - client_id
     columns:
       - name: disposition_id
         description: "Natural key of the disposition. Grain of the table."
+        data_tests:
+          - unique
+          - not_null
       - name: account_key
         description: "Foreign key to dim_account."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_account')
+                field: account_key
       - name: customer_key
         description: "Foreign key to dim_customer."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customer')
+                field: customer_key
       - name: account_id
         description: "Natural key of the account."
       - name: client_id
@@ -93,13 +136,35 @@ models:
 
   - name: fct_transactions
     description: "Transaction fact. One row per transaction. Incremental model."
+    data_tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "amount > 0 or coalesce(purpose, '') in ('interest', 'penalty_interest')"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "signed_amount = case when transaction_type = 'credit' then amount else -amount end"
     columns:
       - name: transaction_id
         description: "Natural key of the transaction. unique_key of the incremental model."
+        data_tests:
+          - unique
+          - not_null
       - name: account_key
         description: "Foreign key to dim_account."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_account')
+                field: account_key
       - name: date_key
         description: "Foreign key to dim_date."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_key
       - name: transaction_date
         description: "Transaction date. Used by the incremental filter."
       - name: transaction_type
@@ -109,7 +174,7 @@ models:
       - name: purpose
         description: "Purpose of the transaction. Null if unknown."
       - name: amount
-        description: "Transaction amount. Always positive."
+        description: "Transaction amount. Positive. Zero is valid only for interest and penalty_interest."
       - name: signed_amount
         description: "Amount with sign. Credit is positive, other types are negative."
       - name: balance
@@ -121,19 +186,45 @@ models:
 
   - name: fct_loans
     description: "Loan fact. One row per loan. Incremental model."
+    data_tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "amount > 0"
     columns:
       - name: loan_id
         description: "Natural key of the loan. unique_key of the incremental model."
+        data_tests:
+          - unique
+          - not_null
       - name: account_key
         description: "Foreign key to dim_account."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_account')
+                field: account_key
       - name: date_key
         description: "Foreign key to dim_date. Based on granted_date."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_key
       - name: granted_date
         description: "Loan grant date. Used by the incremental filter."
       - name: amount
         description: "Loan amount."
       - name: duration
         description: "Loan duration in months."
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 12
+                max_value: 60
+              config:
+                severity: warn
       - name: payments
         description: "Monthly payment amount."
       - name: loan_status
