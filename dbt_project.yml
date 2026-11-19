@@ -1,0 +1,20 @@
+name: 'berka'
+version: '1.0.0'
+profile: 'berka'
+
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  berka:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: view
+    marts:
+      +materialized: table
