@@ -1,0 +1,11 @@
+services:
+  dbt:
+    build: .
+    image: berka-dbt
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      DBT_PROFILES_DIR: /app
+    stdin_open: true
+    tty: true
