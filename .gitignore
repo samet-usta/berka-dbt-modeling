@@ -1,0 +1,13 @@
+# Data
+data/raw/*.csv
+*.duckdb
+*.duckdb.wal
+
+# dbt
+target/
+dbt_packages/
+logs/
+
+# Python
+__pycache__/
+.venv/
