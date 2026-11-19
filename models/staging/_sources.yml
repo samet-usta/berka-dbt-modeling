@@ -1,0 +1,23 @@
+version: 2
+
+sources:
+  - name: berka
+    description: "Berka (PKDD'99) Czech bank data. Loaded by scripts/load_raw.py. All columns are VARCHAR."
+    schema: raw
+    tables:
+      - name: account
+        description: "Bank accounts."
+      - name: card
+        description: "Credit cards issued to dispositions."
+      - name: client
+        description: "Bank clients."
+      - name: disp
+        description: "Dispositions. Links clients to accounts (owner or user)."
+      - name: district
+        description: "Demographic data of districts. Columns A1 to A16."
+      - name: loan
+        description: "Loans granted to accounts."
+      - name: orders
+        description: "Permanent payment orders. Source file is order.csv."
+      - name: trans
+        description: "Account transactions."
