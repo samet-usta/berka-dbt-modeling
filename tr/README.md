@@ -220,3 +220,7 @@ Gereksinimler: Docker ve bir bash shell (Windows'ta Git Bash).
 ├── Dockerfile
 └── docker-compose.yml
 ```
+
+## Katkı
+
+Bkz. [CONTRIBUTING.md](CONTRIBUTING.md).
