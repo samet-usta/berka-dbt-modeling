@@ -1,5 +1,7 @@
 # Berka dbt Modeling
 
+**English** | [Türkçe](tr/README.md)
+
 A dbt project that models the Berka banking dataset into a **star schema** with **SCD Type 2** dimensions. Change batches (CDC) are simulated and captured with **dbt snapshots**. The project runs locally with **DuckDB** inside **Docker**.
 
 Highlights:
@@ -211,6 +213,7 @@ Requirements: Docker and a bash shell (Git Bash on Windows).
 ├── snapshots/           # _snapshots.yml
 ├── tests/marts/         # singular tests
 ├── scripts/             # load_raw.py, cdc_generator.py, apply_cdc_batch.py
+├── tr/                  # Turkish copies
 ├── dbt_project.yml
 ├── profiles.yml
 ├── packages.yml / package-lock.yml
