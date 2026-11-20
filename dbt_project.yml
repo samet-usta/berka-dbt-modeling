@@ -27,3 +27,7 @@ vars:
   reference_date: '1998-12-31'
   dim_date_start: '1993-01-01'
   dim_date_end: '1998-12-31'
+
+snapshots:
+  berka:
+    +schema: snapshots

@@ -17,18 +17,29 @@ with loans as (
 
 ),
 
+accounts as (
+
+    select * from {{ ref('dim_account') }}
+
+),
+
 final as (
 
     select
-        loan_id,
-        {{ dbt_utils.generate_surrogate_key(['account_id']) }} as account_key,
-        cast(strftime(granted_date, '%Y%m%d') as integer)      as date_key,
-        granted_date,
-        amount,
-        duration,
-        payments,
-        loan_status
+        loans.loan_id,
+        accounts.account_key,
+        cast(strftime(loans.granted_date, '%Y%m%d') as integer) as date_key,
+        loans.granted_date,
+        loans.amount,
+        loans.duration,
+        loans.payments,
+        loans.loan_status
     from loans
+    -- Range join: account version valid on the grant date (decision 81)
+    left join accounts
+        on loans.account_id = accounts.account_id
+        and loans.granted_date >= accounts.valid_from
+        and loans.granted_date < accounts.valid_to
 
 )
 

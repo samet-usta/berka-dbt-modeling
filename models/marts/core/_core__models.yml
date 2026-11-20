@@ -31,24 +31,44 @@ models:
         description: "True if the day is Saturday or Sunday."
 
   - name: dim_customer
-    description: "Customer dimension. One row per client."
+    description: "Customer dimension, SCD2. One row per client version. Source: snp_clients."
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - client_id
+              - valid_from
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "valid_from < valid_to"
     columns:
       - name: customer_key
-        description: "Surrogate key. Hash of client_id."
+        description: "Version key. Hash of client_id and valid_from."
         data_tests:
           - unique
           - not_null
       - name: client_id
-        description: "Natural key from the source."
+        description: "Natural key from the source. Durable key: the same for all versions."
         data_tests:
-          - unique
+          - not_null
+      - name: valid_from
+        description: "Start of the version (inclusive). The first version starts at 1900-01-01."
+        data_tests:
+          - not_null
+      - name: valid_to
+        description: "End of the version (exclusive). 9999-12-31 for the current version."
+        data_tests:
+          - not_null
+      - name: is_current
+        description: "True for the current version of the client."
+        data_tests:
           - not_null
       - name: gender
-        description: "Client gender (male, female). Derived from birth_number."
+        description: "Client gender (male, female). Derived from birth_number. Type 1."
       - name: birth_date
-        description: "Client birth date. Derived from birth_number."
+        description: "Client birth date. Derived from birth_number. Type 1."
       - name: age
-        description: "Client age at the reference_date var."
+        description: "Client age at the reference_date var. Type 1."
         data_tests:
           - dbt_utils.accepted_range:
               arguments:
@@ -57,48 +77,68 @@ models:
               config:
                 severity: warn
       - name: district_name
-        description: "Name of the client district."
+        description: "Name of the client district in this version. Type 2."
       - name: region
-        description: "Region of the client district."
+        description: "Region of the client district in this version. Type 2."
       - name: district_average_salary
-        description: "Average salary in the client district."
+        description: "Average salary in the client district in this version. Type 2."
       - name: has_card
-        description: "True if the client has a card."
+        description: "True if the client has a card. Type 1."
       - name: card_type
-        description: "Card type (classic, junior, gold). Null if no card."
+        description: "Card type (classic, junior, gold). Null if no card. Type 1."
       - name: card_issued_date
-        description: "Card issue date. Null if no card."
+        description: "Card issue date. Null if no card. Type 1."
 
   - name: dim_account
-    description: "Account dimension. One row per account."
+    description: "Account dimension, SCD2. One row per account version. Source: snp_accounts."
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - account_id
+              - valid_from
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "valid_from < valid_to"
     columns:
       - name: account_key
-        description: "Surrogate key. Hash of account_id."
+        description: "Version key. Hash of account_id and valid_from."
         data_tests:
           - unique
           - not_null
       - name: account_id
-        description: "Natural key from the source."
+        description: "Natural key from the source. Durable key: the same for all versions."
         data_tests:
-          - unique
+          - not_null
+      - name: valid_from
+        description: "Start of the version (inclusive). The first version starts at 1900-01-01."
+        data_tests:
+          - not_null
+      - name: valid_to
+        description: "End of the version (exclusive). 9999-12-31 for the current version."
+        data_tests:
+          - not_null
+      - name: is_current
+        description: "True for the current version of the account."
+        data_tests:
           - not_null
       - name: frequency
-        description: "Statement frequency (monthly, weekly, after_transaction)."
-      - name: created_date
-        description: "Account creation date."
+        description: "Statement frequency (monthly, weekly, after_transaction) in this version. Type 2."
       - name: district_name
-        description: "Name of the account branch district."
+        description: "Name of the account branch district in this version. Type 2."
       - name: region
-        description: "Region of the account branch district."
+        description: "Region of the account branch district in this version. Type 2."
+      - name: created_date
+        description: "Account creation date. Type 1."
       - name: owner_client_id
-        description: "client_id of the account owner. Shortcut for simple queries."
+        description: "client_id of the account owner. Shortcut for simple queries. Type 1."
       - name: disponent_count
-        description: "Number of disponents (users who are not the owner)."
+        description: "Number of disponents (users who are not the owner). Type 1."
       - name: has_loan
-        description: "True if the account has a loan."
+        description: "True if the account has a loan. Type 1."
 
   - name: bridge_account_client
-    description: "Bridge for the many-to-many relation between accounts and clients. One row per disposition."
+    description: "Bridge for the many-to-many relation between accounts and clients. One row per disposition. Uses durable keys, so it links all versions."
     data_tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:
@@ -111,26 +151,22 @@ models:
         data_tests:
           - unique
           - not_null
-      - name: account_key
-        description: "Foreign key to dim_account."
+      - name: account_id
+        description: "Durable key of the account. Joins to dim_account.account_id."
         data_tests:
           - not_null
           - relationships:
               arguments:
                 to: ref('dim_account')
-                field: account_key
-      - name: customer_key
-        description: "Foreign key to dim_customer."
+                field: account_id
+      - name: client_id
+        description: "Durable key of the client. Joins to dim_customer.client_id."
         data_tests:
           - not_null
           - relationships:
               arguments:
                 to: ref('dim_customer')
-                field: customer_key
-      - name: account_id
-        description: "Natural key of the account."
-      - name: client_id
-        description: "Natural key of the client."
+                field: client_id
       - name: disposition_type
         description: "Role of the client on the account (owner, disponent)."
 
@@ -150,7 +186,7 @@ models:
           - unique
           - not_null
       - name: account_key
-        description: "Foreign key to dim_account."
+        description: "Foreign key to the dim_account version valid on transaction_date (range join)."
         data_tests:
           - not_null
           - relationships:
@@ -166,7 +202,7 @@ models:
                 to: ref('dim_date')
                 field: date_key
       - name: transaction_date
-        description: "Transaction date. Used by the incremental filter."
+        description: "Transaction date. Used by the incremental filter and the range join."
       - name: transaction_type
         description: "Transaction type (credit, debit, withdrawal)."
       - name: operation
@@ -197,7 +233,7 @@ models:
           - unique
           - not_null
       - name: account_key
-        description: "Foreign key to dim_account."
+        description: "Foreign key to the dim_account version valid on granted_date (range join)."
         data_tests:
           - not_null
           - relationships:
@@ -213,7 +249,7 @@ models:
                 to: ref('dim_date')
                 field: date_key
       - name: granted_date
-        description: "Loan grant date. Used by the incremental filter."
+        description: "Loan grant date. Used by the incremental filter and the range join."
       - name: amount
         description: "Loan amount."
       - name: duration

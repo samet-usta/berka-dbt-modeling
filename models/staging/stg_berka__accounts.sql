@@ -21,6 +21,8 @@ renamed as (
         -- YYMMDD: 930101 → 1993-01-01
         strptime(date, '%y%m%d')::date as created_date,
 
+        -- Snapshot (SCD2) timestamp strategy bu kolonu okur
+        updated_at,
         _loaded_at
 
     from source

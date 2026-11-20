@@ -17,25 +17,36 @@ with transactions as (
 
 ),
 
+accounts as (
+
+    select * from {{ ref('dim_account') }}
+
+),
+
 final as (
 
     select
-        transaction_id,
-        {{ dbt_utils.generate_surrogate_key(['account_id']) }} as account_key,
-        cast(strftime(transaction_date, '%Y%m%d') as integer)  as date_key,
-        transaction_date,
-        transaction_type,
-        operation,
-        purpose,
-        amount,
+        transactions.transaction_id,
+        accounts.account_key,
+        cast(strftime(transactions.transaction_date, '%Y%m%d') as integer) as date_key,
+        transactions.transaction_date,
+        transactions.transaction_type,
+        transactions.operation,
+        transactions.purpose,
+        transactions.amount,
         case
-            when transaction_type = 'credit' then amount
-            else -amount
-        end                                                    as signed_amount,
-        balance,
-        partner_bank,
-        partner_account
+            when transactions.transaction_type = 'credit' then transactions.amount
+            else -transactions.amount
+        end as signed_amount,
+        transactions.balance,
+        transactions.partner_bank,
+        transactions.partner_account
     from transactions
+    -- Range join: account version valid on the transaction date (decision 81)
+    left join accounts
+        on transactions.account_id = accounts.account_id
+        and transactions.transaction_date >= accounts.valid_from
+        and transactions.transaction_date < accounts.valid_to
 
 )
 

@@ -13,6 +13,9 @@ renamed as (
         birth_number,
 
         cast(district_id as integer) as district_id,
+
+        -- Snapshot (SCD2) timestamp strategy bu kolonu okur
+        updated_at,
         _loaded_at
 
     from source

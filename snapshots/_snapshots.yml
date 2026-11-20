@@ -1,0 +1,50 @@
+snapshots:
+  - name: snp_clients
+    relation: ref('stg_berka__clients')
+    description: "SCD2 history of clients, tracks district changes."
+    config:
+      unique_key: client_id
+      strategy: timestamp
+      updated_at: updated_at
+      hard_deletes: new_record
+      dbt_valid_to_current: "cast('9999-12-31' as timestamp)"
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - client_id
+              - dbt_valid_from
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "dbt_valid_from < dbt_valid_to"
+    columns:
+      - name: dbt_scd_id
+        description: "Unique ID of the version. Created by dbt."
+        data_tests:
+          - unique
+          - not_null
+
+  - name: snp_accounts
+    relation: ref('stg_berka__accounts')
+    description: "SCD2 history of accounts, tracks statement frequency changes."
+    config:
+      unique_key: account_id
+      strategy: timestamp
+      updated_at: updated_at
+      hard_deletes: new_record
+      dbt_valid_to_current: "cast('9999-12-31' as timestamp)"
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - account_id
+              - dbt_valid_from
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "dbt_valid_from < dbt_valid_to"
+    columns:
+      - name: dbt_scd_id
+        description: "Unique ID of the version. Created by dbt."
+        data_tests:
+          - unique
+          - not_null

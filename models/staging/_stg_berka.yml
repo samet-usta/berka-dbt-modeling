@@ -21,6 +21,8 @@ models:
                 severity: warn
       - name: created_date
         description: Date the account was opened.
+      - name: updated_at
+        description: "Last change time in the source system. Snapshot (SCD2) timestamp strategy uses this column."
       - name: _loaded_at
         description: Timestamp when the raw row was loaded.
 
@@ -36,6 +38,8 @@ models:
         description: Encoded birth date and gender (YYMMDD, month + 50 for women). Decoded in intermediate.
       - name: district_id
         description: District where the client lives.
+      - name: updated_at
+        description: "Last change time in the source system. Snapshot (SCD2) timestamp strategy uses this column."
       - name: _loaded_at
         description: Timestamp when the raw row was loaded.
 

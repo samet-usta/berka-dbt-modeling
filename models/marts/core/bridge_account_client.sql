@@ -6,10 +6,9 @@ with dispositions as (
 
 final as (
 
+    -- Durable keys only: the bridge links all versions of an account and a client (decision 82)
     select
         disposition_id,
-        {{ dbt_utils.generate_surrogate_key(['account_id']) }} as account_key,
-        {{ dbt_utils.generate_surrogate_key(['client_id']) }}  as customer_key,
         account_id,
         client_id,
         disposition_type
