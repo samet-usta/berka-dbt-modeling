@@ -14,56 +14,175 @@ sources:
         description: "Bank accounts."
         columns:
           - name: account_id
+            description: "Account ID (primary key)."
             data_tests:
               - unique
               - not_null
+          - name: district_id
+            description: "District of the bank branch."
+          - name: frequency
+            description: "Statement frequency, Czech code (e.g. POPLATEK MESICNE). Decoded in staging."
+          - name: date
+            description: "Account creation date, YYMMDD. Renamed to created_date in staging."
+          - name: updated_at
+            description: "{{ doc('updated_at') }}"
+          - name: _loaded_at
+            description: "{{ doc('loaded_at') }}"
       - name: card
         description: "Credit cards issued to dispositions."
         columns:
           - name: card_id
+            description: "Card ID (primary key)."
             data_tests:
               - unique
               - not_null
+          - name: disp_id
+            description: "Disposition that holds the card. Renamed to disposition_id in staging."
+          - name: type
+            description: "Card type (classic, junior, gold). Renamed to card_type in staging."
+          - name: issued
+            description: "Issue date, YYMMDD plus time. Renamed to issued_date in staging."
+          - name: _loaded_at
+            description: "{{ doc('loaded_at') }}"
       - name: client
         description: "Bank clients."
         columns:
           - name: client_id
+            description: "Client ID (primary key)."
             data_tests:
               - unique
               - not_null
+          - name: birth_number
+            description: "Encoded birth date and gender (YYMMDD, month + 50 for women). PII."
+          - name: district_id
+            description: "District of the client address."
+          - name: updated_at
+            description: "{{ doc('updated_at') }}"
+          - name: _loaded_at
+            description: "{{ doc('loaded_at') }}"
       - name: disp
         description: "Dispositions. Links clients to accounts (owner or user)."
         columns:
           - name: disp_id
+            description: "Disposition ID (primary key)."
             data_tests:
               - unique
               - not_null
+          - name: client_id
+            description: "Client of the disposition."
+          - name: account_id
+            description: "Account of the disposition."
+          - name: type
+            description: "OWNER or DISPONENT. Renamed to disposition_type in staging."
+          - name: _loaded_at
+            description: "{{ doc('loaded_at') }}"
       - name: district
         description: "Demographic data of districts. Columns A1 to A16."
         columns:
           - name: A1
-            description: "District ID (primary key)."
+            description: "District ID (primary key). Renamed to district_id in staging."
             data_tests:
               - unique
               - not_null
+          - name: A2
+            description: "District name. Renamed to district_name."
+          - name: A3
+            description: "Region. Renamed to region."
+          - name: A4
+            description: "Number of inhabitants. Renamed to inhabitants."
+          - name: A5
+            description: "Municipalities with fewer than 500 inhabitants. Renamed to municipalities_lt_500."
+          - name: A6
+            description: "Municipalities with 500 to 1999 inhabitants. Renamed to municipalities_500_1999."
+          - name: A7
+            description: "Municipalities with 2000 to 9999 inhabitants. Renamed to municipalities_2000_9999."
+          - name: A8
+            description: "Municipalities with 10000 or more inhabitants. Renamed to municipalities_gt_10000."
+          - name: A9
+            description: "Number of cities. Renamed to cities."
+          - name: A10
+            description: "Ratio of urban inhabitants. Renamed to urban_ratio."
+          - name: A11
+            description: "Average salary. Renamed to average_salary."
+          - name: A12
+            description: "Unemployment rate 1995. Contains '?'. Renamed to unemployment_rate_95."
+          - name: A13
+            description: "Unemployment rate 1996. Renamed to unemployment_rate_96."
+          - name: A14
+            description: "Entrepreneurs per 1000 inhabitants. Renamed to entrepreneurs_per_1000."
+          - name: A15
+            description: "Committed crimes 1995. Contains '?'. Renamed to crimes_95."
+          - name: A16
+            description: "Committed crimes 1996. Renamed to crimes_96."
+          - name: _loaded_at
+            description: "{{ doc('loaded_at') }}"
       - name: loan
         description: "Loans granted to accounts."
         columns:
           - name: loan_id
+            description: "Loan ID (primary key)."
             data_tests:
               - unique
               - not_null
+          - name: account_id
+            description: "Account that received the loan."
+          - name: date
+            description: "Grant date, YYMMDD. Renamed to granted_date in staging."
+          - name: amount
+            description: "Loan amount."
+          - name: duration
+            description: "Loan duration in months."
+          - name: payments
+            description: "Monthly payment."
+          - name: status
+            description: "Status code A, B, C, D. Decoded to loan_status in staging."
+          - name: _loaded_at
+            description: "{{ doc('loaded_at') }}"
       - name: orders
         description: "Permanent payment orders. Source file is order.csv."
         columns:
           - name: order_id
+            description: "Order ID (primary key)."
             data_tests:
               - unique
               - not_null
+          - name: account_id
+            description: "Account that pays the order."
+          - name: bank_to
+            description: "Bank of the recipient."
+          - name: account_to
+            description: "Account of the recipient (external, not a Berka ID)."
+          - name: amount
+            description: "Order amount."
+          - name: k_symbol
+            description: "Payment purpose, Czech code. Decoded to purpose in staging."
+          - name: _loaded_at
+            description: "{{ doc('loaded_at') }}"
       - name: trans
         description: "Account transactions."
         columns:
           - name: trans_id
+            description: "Transaction ID (primary key). Renamed to transaction_id in staging."
             data_tests:
               - unique
               - not_null
+          - name: account_id
+            description: "Account of the transaction."
+          - name: date
+            description: "Transaction date, YYMMDD. Renamed to transaction_date in staging."
+          - name: type
+            description: "Credit or debit, Czech code. Decoded to transaction_type in staging."
+          - name: operation
+            description: "Transaction mode, Czech code. Decoded in staging."
+          - name: amount
+            description: "Transaction amount."
+          - name: balance
+            description: "Account balance after the transaction."
+          - name: k_symbol
+            description: "Transaction purpose, Czech code. Decoded to purpose in staging."
+          - name: bank
+            description: "Bank of the partner. Renamed to partner_bank in staging."
+          - name: account
+            description: "Account of the partner (external). Renamed to partner_account in staging."
+          - name: _loaded_at
+            description: "{{ doc('loaded_at') }}"

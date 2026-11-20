@@ -18,11 +18,29 @@ snapshots:
           arguments:
             expression: "dbt_valid_from < dbt_valid_to"
     columns:
+      - name: client_id
+        description: "Client ID (natural key)."
+      - name: birth_number
+        description: "Encoded birth date and gender. PII, not moved to marts."
+      - name: district_id
+        description: "District of the client address. Tracked column (Type 2)."
+      - name: updated_at
+        description: "{{ doc('updated_at') }}"
+      - name: _loaded_at
+        description: "{{ doc('loaded_at') }}"
       - name: dbt_scd_id
-        description: "Unique ID of the version. Created by dbt."
+        description: "{{ doc('dbt_scd_id') }}"
         data_tests:
           - unique
           - not_null
+      - name: dbt_updated_at
+        description: "{{ doc('dbt_updated_at') }}"
+      - name: dbt_valid_from
+        description: "{{ doc('dbt_valid_from') }}"
+      - name: dbt_valid_to
+        description: "{{ doc('dbt_valid_to') }}"
+      - name: dbt_is_deleted
+        description: "{{ doc('dbt_is_deleted') }}"
 
   - name: snp_accounts
     relation: ref('stg_berka__accounts')
@@ -43,8 +61,28 @@ snapshots:
           arguments:
             expression: "dbt_valid_from < dbt_valid_to"
     columns:
+      - name: account_id
+        description: "Account ID (natural key)."
+      - name: district_id
+        description: "District of the bank branch."
+      - name: frequency
+        description: "Statement frequency (monthly, weekly, after_transaction). Tracked column (Type 2)."
+      - name: created_date
+        description: "Account creation date."
+      - name: updated_at
+        description: "{{ doc('updated_at') }}"
+      - name: _loaded_at
+        description: "{{ doc('loaded_at') }}"
       - name: dbt_scd_id
-        description: "Unique ID of the version. Created by dbt."
+        description: "{{ doc('dbt_scd_id') }}"
         data_tests:
           - unique
           - not_null
+      - name: dbt_updated_at
+        description: "{{ doc('dbt_updated_at') }}"
+      - name: dbt_valid_from
+        description: "{{ doc('dbt_valid_from') }}"
+      - name: dbt_valid_to
+        description: "{{ doc('dbt_valid_to') }}"
+      - name: dbt_is_deleted
+        description: "{{ doc('dbt_is_deleted') }}"
