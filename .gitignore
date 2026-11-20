@@ -1,5 +1,6 @@
 # Data
 data/raw/*.csv
+data/landing/
 *.duckdb
 *.duckdb.wal
 
@@ -7,9 +8,8 @@ data/raw/*.csv
 target/
 dbt_packages/
 logs/
+.user.yml
 
 # Python
 __pycache__/
 .venv/
-.user.yml
-data/landing/
